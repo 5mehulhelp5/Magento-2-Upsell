@@ -34,7 +34,7 @@ class ProductToUpsellProduct
             ->setName($product->getName())
             ->setImage($this->getImage($product))
             ->setFormattedPrice($this->getFormattedPrice($product))
-            ->setFinalPrice($product->getFinalPrice());
+            ->setFinalPrice((float)$product->getFinalPrice());
 
         return $upsellProduct;
     }
