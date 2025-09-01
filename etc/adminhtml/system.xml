@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="collectorbank_checkout">
+                <group
+                        id="upsell"
+                        translate="label"
+                        type="text"
+                        sortOrder="30"
+                        showInDefault="1"
+                        showInWebsite="1"
+                        showInStore="1"
+                >
+                    <label>Walley Upsell Configuration</label>
+                    <field
+                            id="active"
+                            translate="label"
+                            type="select"
+                            sortOrder="1"
+                            showInDefault="1"
+                            showInWebsite="1"
+                            showInStore="1"
+                    >
+                        <label>Enabled</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+
+                    <field
+                        id="order_upsell_status"
+                        translate="label"
+                        type="select"
+                        sortOrder="15"
+                        showInDefault="1"
+                        showInWebsite="1"
+                        showInStore="1"
+                    >
+                        <label>Order status - In Upsell</label>
+                        <comment>When the customer is in the decision process of applying upsell or not.</comment>
+                        <validate>required-entry</validate>
+                        <source_model>Magento\Sales\Model\Config\Source\Order\Status\Processing</source_model>
+                        <depends>
+                            <field id='active'>1</field>
+                        </depends>
+                    </field>
+
+                    <field
+                        id="recommendation_type"
+                        translate="label"
+                        type="select"
+                        sortOrder="20"
+                        showInDefault="1"
+                        showInWebsite="1"
+                        showInStore="1"
+                    >
+                        <label>Recommendation type</label>
+                        <comment>
+                            Type of recommendation to use.
+                        </comment>
+                        <depends>
+                            <field id='active'>1</field>
+                        </depends>
+                        <source_model>Walley\Upsell\Model\Config\Source\RecommendationTypes</source_model>
+                    </field>
+
+                    <field
+                            id="category_id"
+                            translate="label"
+                            type="text"
+                            sortOrder="30"
+                            showInDefault="1"
+                            showInWebsite="1"
+                            showInStore="1"
+                    >
+                        <label>Category id</label>
+                        <comment>
+                            Category id of the category to take products from.
+                        </comment>
+                        <depends>
+                            <field id='active'>1</field>
+                        </depends>
+                    </field>
+
+                    <field
+                        id="header"
+                        translate="label"
+                        type="text"
+                        sortOrder="40"
+                        showInDefault="1"
+                        showInWebsite="1"
+                        showInStore="1"
+                    >
+                        <label>Header</label>
+                        <comment>
+                            Header text e.g. Do you want to add something else?
+                        </comment>
+                        <depends>
+                            <field id='active'>1</field>
+                        </depends>
+                    </field>
+
+                    <field
+                        id="timertext"
+                        translate="label"
+                        type="text"
+                        sortOrder="50"
+                        showInDefault="1"
+                        showInWebsite="1"
+                        showInStore="1"
+                    >
+                        <label>Timer text</label>
+                        <comment>
+                            Timer text e.g. Time left
+                        </comment>
+                        <depends>
+                            <field id='active'>1</field>
+                        </depends>
+                    </field>
+
+                    <field
+                            id="countdown_seconds"
+                            translate="label"
+                            type="text"
+                            sortOrder="60"
+                            showInDefault="1"
+                            showInWebsite="1"
+                            showInStore="1"
+                    >
+                        <label>Countdown seconds</label>
+                        <comment>
+                            What the countdown timer should start on.
+                        </comment>
+                        <depends>
+                            <field id='active'>1</field>
+                        </depends>
+                    </field>
+
+                    <field
+                        id="enable_test"
+                        translate="label"
+                        type="select"
+                        sortOrder="70"
+                        showInDefault="1"
+                        showInWebsite="1"
+                        showInStore="1"
+                    >
+                        <label>Test upsell functionality</label>
+                        <comment>
+                            This enables a page that can be used for testing upsell for different increment order ids.
+                            Enable this, clear cache and goto this url for any order id: {base-url}upsell/test/index/id/{order id}
+                        </comment>
+                        <depends>
+                            <field id='active'>1</field>
+                        </depends>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+
+                </group>
+            </group>
+        </section>
+    </system>
+</config>

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block name="success_upsell"
+                   before="collectorbank_success_iframe"
+                   template="Walley_Upsell::success_upsell.phtml">
+                <arguments>
+                    <argument name="UpsellDataProvider" xsi:type="object">
+                        Walley\Upsell\ViewModel\UpsellDataProvider
+                    </argument>
+                    <argument name="ConfirmedPriceHelper" xsi:type="object">
+                        Walley\Upsell\ViewModel\ConfirmedPriceHelper
+                    </argument>
+                    <argument name="IsUpsellAllowed" xsi:type="object">
+                        Walley\Upsell\ViewModel\IsUpsellAllowedForOrder
+                    </argument>
+                    <argument name="GetSuccessOrder" xsi:type="object">
+                        Walley\Upsell\ViewModel\GetSuccessOrder
+                    </argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

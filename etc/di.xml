@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Walley\Upsell\Api\Data\UpsellProductInterface"
+                type="Walley\Upsell\Model\Products\UpsellProduct" />
+    <preference for="Walley\Upsell\Api\Data\UpsellConfigInterface"
+                type="Walley\Upsell\Model\Config\UpsellConfig" />
+    <preference for="Walley\Upsell\Api\Data\UpsellInterface"
+                type="Walley\Upsell\Model\Upsell" />
+    <preference for="Walley\Upsell\Api\GetUpsellInterface"
+                type="Walley\Upsell\Model\GetUpsell" />
+    <preference for="Walley\Upsell\Api\Data\AddUpsellToOrderResponseInterface"
+                type="Walley\Upsell\Model\AddUpsellToOrderResponse" />
+    <preference for="Walley\Upsell\Api\AddUpsellToOrderInterface"
+                type="Walley\Upsell\Model\AddUpsellToOrder" />
+    <preference for="Walley\Upsell\Api\StatusUpsellToOrderInterface"
+                type="Walley\Upsell\Model\StatusUpsellToOrder" />
+
+
+    <type name="Magento\Framework\Console\CommandListInterface">
+       <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="testupsell" xsi:type="object">
+                    Walley\Upsell\Console\Command\TestUpsell
+                </item>
+                <item name="walley_upsell_change_order_status" xsi:type="object">
+                    Walley\Upsell\Console\Command\ChangeOrderStatus
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Webbhuset\CollectorCheckout\Checkout\Order\Manager">
+        <plugin name="walley_upsell_set_order_status_to_upsell"
+                type="Walley\Upsell\Plugin\SetOrderStatusToUpsell" />
+    </type>
+
+</config>

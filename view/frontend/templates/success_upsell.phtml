@@ -1,0 +1,99 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Walley\Upsell\ViewModel\GetSuccessOrder $getSuccessOrder */
+$getSuccessOrder = $block->getData('GetSuccessOrder');
+$order = $getSuccessOrder->execute() ?? $block->getSuccessOrder();
+/** @var \Walley\Upsell\ViewModel\IsUpsellAllowedForOrder $upsellDataProvider */
+$upsellDataProvider = $block->getData('IsUpsellAllowed');
+$isUpsellAllowed = $block->getIsUpsellAllowed($order) || $upsellDataProvider->execute($order);
+if (!$order || !$isUpsellAllowed || !$order->getCollectorbankPublicId()) {
+    return;
+}
+/** @var \Walley\Upsell\ViewModel\UpsellDataProvider $upsellDataProvider */
+$upsellDataProvider = $block->getData('UpsellDataProvider');
+$upsell = $upsellDataProvider->execute($order->getEntityId());
+$products = $upsell->getUpsellProducts();
+$config = $upsell->getConfig();
+/** @var \Walley\Upsell\ViewModel\ConfirmedPriceHelper $confirmedPriceHelper */
+$confirmedPriceHelper = $block->getData('ConfirmedPriceHelper');
+$priceFormat = $confirmedPriceHelper->execute();
+?>
+<div class="success-upsell"  data-bind="scope: 'success-upsell'">
+    <div class="success-upsell__title">
+        <div class="success-upsell__header"><?= $config->getHeader() ?></div>
+        <div class="success-upsell__countdown"><?= $config->getTimerText() ?></div>
+        <div class="success-upsell__timer" data-bind="text:countDownHours "><?= $upsellDataProvider->secondsToHourFormat($config->getCountdownSeconds()) ?></div>
+    </div>
+    <div class="success-upsell__content">
+        <ol class="success-upsell__content__list">
+            <?php $count = 0; ?>
+            <?php foreach($products as $product): ?>
+                <?php if (++$count > 4) break; ?>
+                <li class="success-upsell__content__list__item">
+                    <div class="success-upsell__content__list__item__image">
+                        <img alt="<?=$product->getName()?>" src="<?=$product->getImage()?>"/>
+                    </div>
+                    <div class="success-upsell__content__list__item__name">
+                        <?=$product->getName()?>
+                    </div>
+                    <div class="success-upsell__content__list__item__price">
+                        <?=$product->getFormattedPrice()?>
+                    </div>
+                    <div class="success-upsell__content__list__item__addtocart">
+                        <button type="button" title="Add to order" class="" data-bind="click: moveToConfirm.bind($data, <?=$product->getProductId()?>), css: isDisabled(<?=$product->getProductId()?>) ? 'lookdisabled' : '', enable: !isCountdownEnded()">
+                            <span></span>
+                        </button>
+                    </div>
+                </li>
+                <?php endforeach; ?>
+        </ol>
+    </div>
+    <div class="success-upsell__confirm" data-bind="visible: total() > 0" style="display:none">
+        <div class="success-upsell__confirm__header">
+            <?=__('Total to add to order: ')?><span class="success-upsell__confirm__total" data-bind="text: totalFormatted"></span>
+        </div>
+        <div class="success-upsell__confirm__button">
+            <button type="button" title="Add to order" class="" data-bind="click: addToOrder.bind($data)">
+                <span>
+                    <?=__('Confirm')?>
+                </span>
+            </button>
+        </div>
+
+    </div>
+</div>
+<div class="success-upsell__message success-upsell__message--success" style="display:none">
+    <div class="success-upsell__message__icon">✓</div>
+    <div class="success-upsell__message__text"></div>
+</div>
+
+
+
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "Magento_Ui/js/core/app": {
+                "components": {
+                    "success-upsell": {
+                        "component": "Walley_Upsell/js/upsell",
+                        "config": <?= json_encode(
+                            array_merge(
+                                $config->toArray(),
+                                ['countDownStart' => $upsellDataProvider->secondsToHourFormat($config->getCountdownSeconds())],
+                                ['formatting' => $priceFormat],
+                                ['publicToken' => $order->getCollectorbankPublicId()],
+                                ['orderId' => (int) $order->getEntityId()],
+                                ['addToOrderUrl' => $upsellDataProvider->getAddToOrderUrl()],
+                                ['processingMessage' => __('Processing...')],
+                                ['successMessage' => __('Items added successfully. You will be redirected to your order summary page in a moment.')],
+                                ['errorMessage' => __('There was an error adding items to your order. Please try again later or contact customer support.')],
+                                ['statusForOrderUrl' => $upsellDataProvider->getStatusForOrderUrl()],
+                                ['products' => $upsellDataProvider->getProductPriceConfig($upsell)]
+                            )
+                        ) ?>
+                    }
+                }
+            }
+        }
+    }
+</script>

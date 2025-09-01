@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<config
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd"
+>
+    <default>
+        <payment>
+            <collectorbank_checkout>
+                <upsell>
+                    <allowed_payment_methods>DirectInvoice,Invoice,Account,PartPayment,Campaign</allowed_payment_methods>
+                    <order_upsell_status>collectorbank_upsell</order_upsell_status>
+                </upsell>
+            </collectorbank_checkout>
+        </payment>
+    </default>
+</config>
