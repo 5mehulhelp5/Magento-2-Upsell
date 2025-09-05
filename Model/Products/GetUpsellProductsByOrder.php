@@ -45,9 +45,6 @@ class GetUpsellProductsByOrder
             case RecommendationTypes::RECOMMENDATION_TYPE_NOT_SET:
                 $products = [];
                 break;
-            case RecommendationTypes::RECOMMENDATION_TYPE_CROSS_SELL:
-                $products = $this->getCrossellByOrder->execute($order);
-                break;
             case RecommendationTypes::RECOMMENDATION_TYPE_CUSTOM:
                 $products = $this->getCustomProductsByOrder->execute($order);
                 break;

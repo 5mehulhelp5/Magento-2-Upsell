@@ -43,7 +43,6 @@ class GetProductsByCategory
         $products = $this->productCollectionFactory->create()
             ->addAttributeToSelect($this->catalogConfig->getProductAttributes())
             ->addCategoryFilter($category)
-            ->addStoreFilter()
             ->addAttributeToFilter('type_id', Type::TYPE_SIMPLE)
             ->setPageSize($this->configProvider->getLimitOfProducts())
             ->getItems();

@@ -4,40 +4,39 @@ declare(strict_types=1);
 namespace Walley\Upsell\Model\WalleyOrder\Converter;
 
 use Magento\Catalog\Api\Data\ProductInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use Magento\Tax\Api\TaxCalculationInterface;
 use Magento\Tax\Model\Config;
+use Walley\Upsell\Model\GetFinalPriceIncludingTax;
 
 class ProductToWalleyItem
 {
-    protected $storeManager;
     protected $taxCalculation;
     protected $taxConfig;
+    private GetFinalPriceIncludingTax $getFinalPriceIncludingTax;
 
     public function __construct(
-        StoreManagerInterface $storeManager,
         TaxCalculationInterface $taxCalculation,
+        GetFinalPriceIncludingTax $getFinalPriceIncludingTax,
         Config $taxConfig
     ) {
-        $this->storeManager = $storeManager;
         $this->taxCalculation = $taxCalculation;
         $this->taxConfig = $taxConfig;
+        $this->getFinalPriceIncludingTax = $getFinalPriceIncludingTax;
     }
 
-    public function execute(ProductInterface $product, int $qty = 1): array
+    public function execute(ProductInterface $product, int $storeId, int $qty = 1): array
     {
         return [
             "id" => $product->getSku(),
             "description" => $product->getName(),
-            "unitPrice" => round((float)$product->getFinalPrice(), 2),
+            "unitPrice" => $this->getFinalPriceIncludingTax->execute($product, $storeId),
             "quantity" => $qty,
-            "vat" => $this->getProductTaxRate($product)
+            "vat" => $this->getProductTaxRate($product, $storeId)
         ];
     }
 
-    private function getProductTaxRate(ProductInterface $product): float
+    private function getProductTaxRate(ProductInterface $product, int $storeId): float
     {
-        $storeId = $this->storeManager->getStore()->getId();
         $taxClassId = $product->getTaxClassId();
 
         return (float) $this->taxCalculation->getCalculatedRate($taxClassId, null, $storeId);

@@ -41,6 +41,7 @@ class AddOrderItems
         $cart = $this->cartRepository->get($order->getQuoteId());
         $cart = $this->addProductsToQuote($cart, $products);
         $itemBySku = $this->getCartItemsByProducts($cart->getAllVisibleItems(), $products);
+        $taxIncrease = 0.0;
         foreach ($products as $product) {
             if (!isset($itemBySku[$product->getSku()])) {
                 return false;
@@ -72,6 +73,7 @@ class AddOrderItems
                 ->setName($quoteItem->getName())
                 ->setIsVirtual($quoteItem->getIsVirtual());
             $order->addItem($orderItem);
+            $taxIncrease += (float) $quoteItem->getTaxAmount();
         }
         $priceIncrease = $this->getPriceIncrease($products);
         $order->setBaseGrandTotal($order->getBaseGrandTotal() + $priceIncrease)
@@ -81,7 +83,11 @@ class AddOrderItems
             ->setBaseSubtotalInclTax($order->getBaseSubtotalInclTax() + $priceIncrease)
             ->setSubtotalInclTax($order->getSubtotalInclTax() + $priceIncrease)
             ->setTotalItemCount($order->getTotalItemCount() + count($products))
-            ->setTotalQtyOrdered($order->getTotalQtyOrdered() + count($products));
+            ->setTotalQtyOrdered($order->getTotalQtyOrdered() + count($products))
+            ->setTaxAmount($order->getTaxAmount() + $taxIncrease)
+            ->setBaseTaxAmount($order->getGrandTotal() + $taxIncrease)
+            ->setTotalDue($order->getTotalDue() + $priceIncrease)
+        ;
         $this->orderRepository->save($order);
 
         return true;

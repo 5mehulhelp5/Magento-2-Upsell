@@ -6,23 +6,31 @@ namespace Walley\Upsell\Model\Products\Converter;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Helper\Product as ProductHelper;
 use Magento\Framework\Pricing\Render;
+use Magento\Store\Model\StoreManagerInterface;
 use Walley\Upsell\Api\Data\UpsellProductInterface;
 use Walley\Upsell\Api\Data\UpsellProductInterfaceFactory;
+use Walley\Upsell\Model\GetFinalPriceIncludingTax;
 
 class ProductToUpsellProduct
 {
     private UpsellProductInterfaceFactory $upsellProductInterfaceFactory;
     private ProductHelper $productHelper;
     private Render $priceRenderer;
+    private GetFinalPriceIncludingTax $getFinalPriceIncludingTax;
+    private StoreManagerInterface $storeManager;
 
     public function __construct(
         UpsellProductInterfaceFactory $upsellProductInterfaceFactory,
         ProductHelper $productHelper,
+        StoreManagerInterface $storeManager,
+        GetFinalPriceIncludingTax $getFinalPriceIncludingTax,
         Render $priceRenderer
     ) {
         $this->upsellProductInterfaceFactory = $upsellProductInterfaceFactory;
         $this->productHelper = $productHelper;
         $this->priceRenderer = $priceRenderer;
+        $this->getFinalPriceIncludingTax = $getFinalPriceIncludingTax;
+        $this->storeManager = $storeManager;
     }
 
     public function execute(ProductInterface $product):UpsellProductInterface
@@ -34,7 +42,7 @@ class ProductToUpsellProduct
             ->setName($product->getName())
             ->setImage($this->getImage($product))
             ->setFormattedPrice($this->getFormattedPrice($product))
-            ->setFinalPrice((float)$product->getFinalPrice());
+            ->setFinalPrice((float)$this->getFinalPriceIncludingTax->execute($product, (int) $this->storeManager->getStore()->getId()));
 
         return $upsellProduct;
     }

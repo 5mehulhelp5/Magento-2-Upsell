@@ -4,35 +4,38 @@ declare(strict_types=1);
 namespace Walley\Upsell\Model\Products;
 
 use Magento\Catalog\Api\Data\ProductInterface;
-use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Catalog\Model\Config as CatalogConfig;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Store\Model\StoreManagerInterface;
 
 class GetProductsByIds
 {
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
-    private ProductRepositoryInterface $productRepository;
+    private CollectionFactory $collectionFactory;
 
     public function __construct(
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        ProductRepositoryInterface $productRepository
+        CollectionFactory $collectionFactory
     ) {
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->productRepository = $productRepository;
+        $this->collectionFactory = $collectionFactory;
     }
 
     /**
-     * @param ProductInterface[] $productIds
-     * @return array
+     * @param int[] $productIds
+     * @return ProductInterface[]
      */
-    public function execute(array $productIds):array
+    public function execute(array $productIds, int $storeId): array
     {
-        $searchCriteria = $this->searchCriteriaBuilder
-            ->addFilter('entity_id', $productIds, 'in')
-            ->create();
+        if (empty($productIds)) {
+            return [];
+        }
+        $collection = $this->collectionFactory->create();
+        $collection->setStoreId($storeId)
+            ->addStoreFilter($storeId)
+            ->addAttributeToSelect('*')
+            ->addAttributeToFilter('entity_id', ['in' => $productIds]);
 
-        $products = $this->productRepository->getList($searchCriteria)->getItems();
         $result = [];
-        foreach ($products as $product) {
+        foreach ($collection->getItems() as $product) {
+            $product->setStoreId($storeId);
             $result[$product->getSku()] = $product;
         }
 

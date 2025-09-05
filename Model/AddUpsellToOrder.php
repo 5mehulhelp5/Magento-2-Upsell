@@ -41,7 +41,8 @@ class AddUpsellToOrder implements AddUpsellToOrderInterface
             $response->setStatus(401)
                 ->setMessage('Failed to add upsell - please contact customer service');
         }
-        $products = $this->getProductsByIds->execute($productIds);
+        $storeId = (int) $order->getStoreId();
+        $products = $this->getProductsByIds->execute($productIds, $storeId);
         $isSuccess = $this->addOrderItems->execute($order, $products);
 
         $walleyResponse = $this->addProductsToWalleyOrder->execute($products, $order);

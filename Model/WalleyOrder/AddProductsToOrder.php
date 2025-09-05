@@ -55,8 +55,9 @@ class AddProductsToOrder
             return 500;
         }
         $walleyItemsToAdd = [];
+        $storeId = (int) $order->getStoreId();
         foreach ($products as $product) {
-            $walleyItemsToAdd[] = $this->productToWalleyItem->execute($product);
+            $walleyItemsToAdd[] = $this->productToWalleyItem->execute($product, $storeId);
         }
         $walleyOrder = $this->getOrder->execute($order);
         $walleyOrderItems = $this->getItemsFromWalleyOrder($walleyOrder);
