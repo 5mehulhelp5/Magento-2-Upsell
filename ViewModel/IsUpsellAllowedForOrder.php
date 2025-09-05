@@ -6,15 +6,19 @@ namespace Walley\Upsell\ViewModel;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Walley\Upsell\Model\Config\ConfigProvider;
+use Walley\Upsell\Model\GetWalleyPaymentMethod;
 
 class IsUpsellAllowedForOrder implements ArgumentInterface
 {
     private ConfigProvider $configProvider;
+    private GetWalleyPaymentMethod $getWalleyPaymentMethod;
 
     public function __construct(
-        ConfigProvider $configProvider
+        ConfigProvider $configProvider,
+        GetWalleyPaymentMethod $getWalleyPaymentMethod
     ) {
         $this->configProvider = $configProvider;
+        $this->getWalleyPaymentMethod = $getWalleyPaymentMethod;
     }
 
     public function execute(OrderInterface $order):bool
@@ -41,7 +45,7 @@ class IsUpsellAllowedForOrder implements ArgumentInterface
             || !is_array($additionalInformation)
             || !isset($additionalInformation['payment_name'])
         ) {
-            return null;
+            return $this->getWalleyPaymentMethod->execute($order);
         }
         return $additionalInformation['payment_name'];
     }
