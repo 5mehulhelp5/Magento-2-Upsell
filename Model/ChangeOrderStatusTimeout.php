@@ -62,7 +62,7 @@ class ChangeOrderStatusTimeout
     {
         foreach ($orders as $order) {
             $storeId = $order->getStoreId();
-            $status = $this->configProvider->getAcknowledgeOrderStatus($storeId);
+            $status = $this->configProvider->getAcknowledgeOrderStatus((int) $storeId);
             $order->setStatus($status);
             try {
                 $this->orderResource->save($order);
