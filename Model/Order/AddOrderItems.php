@@ -41,15 +41,22 @@ class AddOrderItems
         $cart = $this->cartRepository->get($order->getQuoteId());
         $cart = $this->addProductsToQuote($cart, $products);
         $itemBySku = $this->getCartItemsByProducts($cart->getAllVisibleItems(), $products);
-        $taxIncrease = 0.0;
+
+        $rowExcl = 0.0;       $baseRowExcl = 0.0;
+        $rowIncl = 0.0;       $baseRowIncl = 0.0;
+        $taxInc  = 0.0;       $baseTaxInc  = 0.0;
+        $qtyInc  = 0.0;       $itemInc     = 0;
+
         foreach ($products as $product) {
             if (!isset($itemBySku[$product->getSku()])) {
                 return false;
             }
+
             /** @var \Magento\Sales\Model\Order\Item $orderItem */
             $orderItem = $this->orderItemFactory->create();
-            /** @var CartItemInterface $quoteItem */
+            /** @var \Magento\Quote\Api\Data\CartItemInterface $quoteItem */
             $quoteItem = $itemBySku[$product->getSku()];
+
             $orderItem
                 ->setQuoteItemId($quoteItem->getItemId())
                 ->setQtyOrdered($quoteItem->getQty())
@@ -72,39 +79,33 @@ class AddOrderItems
                 ->setBaseTaxAmount($quoteItem->getBaseTaxAmount())
                 ->setName($quoteItem->getName())
                 ->setIsVirtual($quoteItem->getIsVirtual());
+
             $order->addItem($orderItem);
-            $taxIncrease += (float) $quoteItem->getTaxAmount();
+
+            $rowExcl     += (float)$quoteItem->getRowTotal();
+            $baseRowExcl += (float)$quoteItem->getBaseRowTotal();
+            $rowIncl     += (float)$quoteItem->getRowTotalInclTax();
+            $baseRowIncl += (float)$quoteItem->getBaseRowTotalInclTax();
+            $taxInc      += (float)$quoteItem->getTaxAmount();
+            $baseTaxInc  += (float)$quoteItem->getBaseTaxAmount();
+            $qtyInc      += (float)$quoteItem->getQty();
+            $itemInc++;
         }
-        $priceIncrease = $this->getPriceIncrease($products);
-        $order->setBaseGrandTotal($order->getBaseGrandTotal() + $priceIncrease)
-            ->setGrandTotal($order->getGrandTotal() + $priceIncrease)
-            ->setBaseSubtotal($order->getBaseSubtotal() + $priceIncrease)
-            ->setSubtotal($order->getSubtotal() + $priceIncrease)
-            ->setBaseSubtotalInclTax($order->getBaseSubtotalInclTax() + $priceIncrease)
-            ->setSubtotalInclTax($order->getSubtotalInclTax() + $priceIncrease)
-            ->setTotalItemCount($order->getTotalItemCount() + count($products))
-            ->setTotalQtyOrdered($order->getTotalQtyOrdered() + count($products))
-            ->setTaxAmount($order->getTaxAmount() + $taxIncrease)
-            ->setBaseTaxAmount($order->getGrandTotal() + $taxIncrease)
-            ->setTotalDue($order->getTotalDue() + $priceIncrease)
-        ;
+
+        $order->setSubtotal($order->getSubtotal() + $rowExcl)
+            ->setBaseSubtotal($order->getBaseSubtotal() + $baseRowExcl)
+            ->setSubtotalInclTax(($order->getSubtotalInclTax() ?: 0) + $rowIncl)
+            ->setBaseSubtotalInclTax(($order->getBaseSubtotalInclTax() ?: 0) + $baseRowIncl)
+            ->setTaxAmount($order->getTaxAmount() + $taxInc)
+            ->setBaseTaxAmount($order->getBaseTaxAmount() + $baseTaxInc)
+            ->setGrandTotal($order->getGrandTotal() + $rowIncl)
+            ->setBaseGrandTotal($order->getBaseGrandTotal() + $baseRowIncl)
+            ->setTotalDue(($order->getTotalDue() ?: 0) + $rowIncl)
+            ->setTotalItemCount($order->getTotalItemCount() + $itemInc)
+            ->setTotalQtyOrdered($order->getTotalQtyOrdered() + $qtyInc);
+
         $this->orderRepository->save($order);
-
         return true;
-    }
-
-    /**
-     * @param ProductInterface[] $products
-     * @return float
-     */
-    private function getPriceIncrease(array $products):float
-    {
-        $result = 0.0;
-        foreach ($products as $product) {
-            $result += (float) $product->getFinalPrice();
-        }
-
-        return $result;
     }
 
     /**
