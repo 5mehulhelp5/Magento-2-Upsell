@@ -42,10 +42,14 @@ class AddOrderItems
         $cart = $this->addProductsToQuote($cart, $products);
         $itemBySku = $this->getCartItemsByProducts($cart->getAllVisibleItems(), $products);
 
-        $rowExcl = 0.0;       $baseRowExcl = 0.0;
-        $rowIncl = 0.0;       $baseRowIncl = 0.0;
-        $taxInc  = 0.0;       $baseTaxInc  = 0.0;
-        $qtyInc  = 0.0;       $itemInc     = 0;
+        $rowExcl = 0.0;
+        $baseRowExcl = 0.0;
+        $rowIncl = 0.0;
+        $baseRowIncl = 0.0;
+        $taxInc  = 0.0;
+        $baseTaxInc  = 0.0;
+        $qtyInc  = 0.0;
+        $itemInc = 0;
 
         foreach ($products as $product) {
             if (!isset($itemBySku[$product->getSku()])) {
