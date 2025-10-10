@@ -71,8 +71,21 @@ define([
                         .fadeIn()
                         .find('.success-upsell__message__text')
                         .text(response.message || self.successMessage);
-                } else {
-                    // Unexpected but treat as success message text if present
+                } else if (code === 403) {
+                    self._retryCount = (self._retryCount || 0) + 1;
+
+                    if (self._retryCount <= 2) {
+                        setTimeout(function () {
+                            self.addToOrder(data, event);
+                        }, 2000);
+                    } else {
+                        $('.success-upsell__message--success')
+                            .fadeIn()
+                            .find('.success-upsell__message__text')
+                            .text(response && response.message ? response.message : 'Request completed.');
+                        self._retryCount = 0;
+                    }
+                } {
                     $('.success-upsell__message--success')
                         .fadeIn()
                         .find('.success-upsell__message__text')
